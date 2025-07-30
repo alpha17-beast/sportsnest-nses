@@ -56,19 +56,33 @@ const UserManagement = () => {
     try {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          user_roles(role),
-          user_houses(house_id, houses(name))
-        `);
+        .select('*');
 
-      const usersWithRoles = profiles?.map(profile => ({
-        ...profile,
-        role: profile.user_roles?.[0]?.role || 'student',
-        house: profile.user_houses?.[0]?.houses?.name || 'None'
-      })) || [];
+      // Get user roles and houses separately
+      const usersWithDetails = await Promise.all(
+        (profiles || []).map(async (profile: any) => {
+          const { data: userRole } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profile.user_id)
+            .single();
 
-      setUsers(usersWithRoles);
+          const { data: userHouse } = await supabase
+            .from('user_houses')
+            .select('houses(name)')
+            .eq('user_id', profile.user_id)
+            .single();
+
+          return {
+            id: profile.user_id,
+            ...profile,
+            role: userRole?.role || 'student',
+            house: userHouse?.houses?.name || 'None'
+          };
+        })
+      );
+
+      setUsers(usersWithDetails);
     } catch (error) {
       toast({
         title: "Error",

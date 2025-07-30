@@ -61,9 +61,7 @@ const HousePointsManagement = () => {
         .from('house_points')
         .select(`
           *,
-          houses(name),
-          awarded_by:profiles!house_points_awarded_by_fkey(first_name, last_name),
-          awarded_to:profiles!house_points_awarded_to_user_fkey(first_name, last_name)
+          houses(name)
         `)
         .order('awarded_at', { ascending: false })
         .limit(50);
@@ -71,8 +69,8 @@ const HousePointsManagement = () => {
       const pointsWithNames = data?.map(point => ({
         ...point,
         house_name: point.houses?.name || 'Unknown',
-        awarded_by_name: point.awarded_by ? `${point.awarded_by.first_name} ${point.awarded_by.last_name}` : 'System',
-        awarded_to_name: point.awarded_to ? `${point.awarded_to.first_name} ${point.awarded_to.last_name}` : 'House'
+        awarded_by_name: 'System',
+        awarded_to_name: 'House'
       })) || [];
 
       setHousePoints(pointsWithNames);
@@ -103,11 +101,11 @@ const HousePointsManagement = () => {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('user_id as id, first_name, last_name')
+        .select('user_id, first_name, last_name')
         .eq('is_active', true);
       
       const usersWithNames = data?.map(user => ({
-        ...user,
+        id: user.user_id,
         name: `${user.first_name} ${user.last_name}`
       })) || [];
       
@@ -140,18 +138,17 @@ const HousePointsManagement = () => {
       if (error) throw error;
 
       // Update house total points manually
-        const { data: currentHouse } = await supabase
-          .from('houses')
-          .select('total_points')
-          .eq('id', formData.house_id)
-          .single();
+      const { data: currentHouse } = await supabase
+        .from('houses')
+        .select('total_points')
+        .eq('id', formData.house_id)
+        .single();
 
-        if (currentHouse) {
-          await supabase
-            .from('houses')
-            .update({ total_points: (currentHouse.total_points || 0) + points })
-            .eq('id', formData.house_id);
-        }
+      if (currentHouse) {
+        await supabase
+          .from('houses')
+          .update({ total_points: (currentHouse.total_points || 0) + points })
+          .eq('id', formData.house_id);
       }
 
       toast({

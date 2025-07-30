@@ -75,17 +75,16 @@ const TeamManagement = () => {
         .select(`
           *,
           sports(name),
-          houses(name),
-          captain:profiles!teams_captain_id_fkey(first_name, last_name),
-          coach:profiles!teams_coach_id_fkey(first_name, last_name)
+          houses(name)
         `);
 
-      const teamsWithNames = data?.map(team => ({
+      const teamsWithNames = data?.map((team: any) => ({
         ...team,
         sport_name: team.sports?.name || 'Unknown',
         house_name: team.houses?.name || 'Unknown',
-        captain_name: team.captain ? `${team.captain.first_name} ${team.captain.last_name}` : 'None',
-        coach_name: team.coach ? `${team.coach.first_name} ${team.coach.last_name}` : 'None'
+        captain_name: 'Not assigned',
+        coach_name: 'Not assigned',
+        member_count: 0
       })) || [];
 
       setTeams(teamsWithNames);
@@ -132,8 +131,8 @@ const TeamManagement = () => {
         .select('user_id as id, first_name, last_name')
         .eq('is_active', true);
       
-      const usersWithNames = data?.map(user => ({
-        ...user,
+      const usersWithNames = data?.map((user: any) => ({
+        id: user.user_id,
         name: `${user.first_name} ${user.last_name}`
       })) || [];
       
