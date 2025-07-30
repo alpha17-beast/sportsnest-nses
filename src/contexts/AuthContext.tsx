@@ -119,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: error.message };
       }
 
+      // Don't set loading to false here - let onAuthStateChange handle it
       return { success: true };
     } catch (error) {
       setIsLoading(false);
