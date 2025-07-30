@@ -128,7 +128,7 @@ const TeamManagement = () => {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('user_id as id, first_name, last_name')
+        .select('user_id, first_name, last_name')
         .eq('is_active', true);
       
       const usersWithNames = data?.map((user: any) => ({

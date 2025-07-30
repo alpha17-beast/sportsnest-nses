@@ -65,13 +65,13 @@ const UserManagement = () => {
             .from('user_roles')
             .select('role')
             .eq('user_id', profile.user_id)
-            .single();
+            .maybeSingle();
 
           const { data: userHouse } = await supabase
             .from('user_houses')
             .select('houses(name)')
             .eq('user_id', profile.user_id)
-            .single();
+            .maybeSingle();
 
           return {
             id: profile.user_id,
@@ -84,6 +84,7 @@ const UserManagement = () => {
 
       setUsers(usersWithDetails);
     } catch (error) {
+      console.error('Error fetching users:', error);
       toast({
         title: "Error",
         description: "Failed to fetch users",
